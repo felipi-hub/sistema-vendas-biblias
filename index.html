@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Venda - Bíblias e Hinários</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        @media (max-width: 768px) {
+            .card-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .btn-mobile {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            .header-title {
+                font-size: 1.25rem;
+            }
+
+            .header-subtitle {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+
+                    <div>
+                        <h1 class="text-xl font-bold header-title">Sistema de Vendas</h1>
+                        <p class="text-blue-100 text-xs header-subtitle">Bíblias, Hinários e Livros</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <div id="dbStatus" class="bg-white/20 px-3 py-1.5 rounded-lg flex items-center">
+                        <i class="fas fa-circle-notch fa-spin text-white mr-2"></i>
+                        <span class="text-white text-xs">Conectando...</span>
+                    </div>
+                    <button onclick="showSection('dashboard')"
+                        class="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                        <i class="fas fa-chart-line mr-1"></i>Dashboard
+                    </button>
+                    <button onclick="showSection('inventory')"
+                        class="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                        <i class="fas fa-boxes mr-1"></i>Estoque
+                    </button>
+                    <button onclick="showSection('sales')"
+                        class="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                        <i class="fas fa-shopping-cart mr-1"></i>Vendas
+                    </button>
+                    <button onclick="showSection('reports')"
+                        class="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                        <i class="fas fa-file-pdf mr-1"></i>Relatórios
+                    </button>
+                    <button onclick="exportMonthlyPDF()"
+                        class="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                        <i class="fas fa-file-pdf mr-1"></i>PDF Mensal
+                    </button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()"
+                    class="md:hidden p-2 rounded-lg bg-white/20 hover:bg-white/30 transition">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden md:hidden mt-3 space-y-2 pb-2">
+                <div id="dbStatusMobile" class="bg-white/20 px-3 py-2 rounded-lg flex items-center mb-2">
+                    <i class="fas fa-circle-notch fa-spin text-white mr-2"></i>
+                    <span class="text-white text-sm">Conectando...</span>
+                </div>
+                <button onclick="showSection('dashboard'); toggleMobileMenu()"
+                    class="w-full text-left px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                    <i class="fas fa-chart-line mr-2"></i>Dashboard
+                </button>
+                <button onclick="showSection('inventory'); toggleMobileMenu()"
+                    class="w-full text-left px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                    <i class="fas fa-boxes mr-2"></i>Estoque
+                </button>
+                <button onclick="showSection('sales'); toggleMobileMenu()"
+                    class="w-full text-left px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                    <i class="fas fa-shopping-cart mr-2"></i>Vendas
+                </button>
+                <button onclick="showSection('reports'); toggleMobileMenu()"
+                    class="w-full text-left px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                    <i class="fas fa-file-pdf mr-2"></i>Relatórios
+                </button>
+                <button onclick="exportMonthlyPDF(); toggleMobileMenu()"
+                    class="w-full text-left px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-sm">
+                    <i class="fas fa-file-pdf mr-2"></i>PDF Mensal
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg p-4 mb-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold"><i class="fas fa-database mr-2"></i>Banco de Dados IndexedDB</h3>
+                        <p class="text-green-100 text-sm">Sistema usando banco de dados interno do navegador</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-green-100 text-xs">Nome do Banco</p>
+                        <p class="font-bold">SistemaVendasBiblias</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-chart-line text-blue-600 mr-2"></i>Dashboard
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Total em Estoque</p>
+                            <p class="text-3xl font-bold text-gray-800" id="totalStock">0</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-boxes text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Vendas Realizadas</p>
+                            <p class="text-3xl font-bold text-gray-800" id="totalSales">0</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Receita Total</p>
+                            <p class="text-3xl font-bold text-gray-800" id="totalRevenue">R$ 0,00</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-dollar-sign text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Produtos Cadastrados</p>
+                            <p class="text-3xl font-bold text-gray-800" id="totalProducts">0</p>
+                        </div>
+                        <div class="bg-orange-100 p-3 rounded-full">
+                            <i class="fas fa-book text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-pie text-blue-600 mr-2"></i>Produtos por Tipo
+                    </h3>
+                    <div id="productsByType" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-clock text-green-600 mr-2"></i>Últimas Vendas
+                    </h3>
+                    <div id="recentSales" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Section -->
+        <section id="inventory" class="section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-boxes text-blue-600 mr-2"></i>Controle de Estoque
+            </h2>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-plus-circle text-green-600 mr-2"></i>Adicionar/Editar Produto
+                </h3>
+                <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <input type="hidden" id="productId">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                        <select id="productType"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required onchange="updateVersionOptions()">
+                            <option value="">Selecione...</option>
+                            <option value="biblia">Bíblia</option>
+                            <option value="hinario">Hinário</option>
+                            <option value="livro">Livro Musical</option>
+                            <option value="veum">Véu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" id="productName"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Ex: Bíblia de Estudo" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Versão</label>
+                        <select id="productVersion"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required>
+                            <option value="">Selecione...</option>
+                            <option value="adulto">Adulto</option>
+                            <option value="crianca">Criança</option>
+                            <option value="veum">Véu (Mulher)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                        <input type="number" id="productPrice" step="0.01"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="0.00" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                        <input type="number" id="productQuantity"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            min="0" required>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit"
+                            class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
+                            <i class="fas fa-save mr-2"></i>Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <h3 class="text-lg font-bold text-gray-800">
+                            <i class="fas fa-list text-blue-600 mr-2"></i>Lista de Produtos
+                        </h3>
+                        <input type="text" id="searchProduct" placeholder="Buscar produto..."
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full md:w-64">
+                    </div>
+                </div>
+                <div class="overflow-x-auto table-responsive">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tipo</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nome</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Versão</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Valor</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Estoque</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTable" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sales Section -->
+        <section id="sales" class="section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-shopping-cart text-blue-600 mr-2"></i>Registrar Venda
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-cart-plus text-green-600 mr-2"></i>Nova Venda
+                    </h3>
+                    <form id="salesForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Produto</label>
+                            <select id="saleProduct"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                                <option value="">Selecione um produto...</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Valor Unitário</label>
+                                <input type="text" id="salePrice"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                                <input type="number" id="saleQuantity"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    min="1" value="1" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label>
+                            <input type="text" id="saleCustomer"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Nome do cliente">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+                            <select id="salePayment"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                                <option value="dinheiro">💵 Dinheiro</option>
+                                <option value="pix">📱 PIX</option>
+                            </select>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-lg font-medium text-gray-700">Total:</span>
+                                <span class="text-2xl font-bold text-blue-600" id="saleTotal">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium text-lg">
+                            <i class="fas fa-check-circle mr-2"></i>Finalizar Venda
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-info-circle text-blue-600 mr-2"></i>Informações do Produto
+                    </h3>
+                    <div id="productInfo" class="space-y-3">
+                        <p class="text-gray-500 text-center py-8">Selecione um produto para ver as informações</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <h3 class="text-lg font-bold text-gray-800">
+                            <i class="fas fa-history text-purple-600 mr-2"></i>Histórico de Vendas
+                        </h3>
+                        <button onclick="clearSales()"
+                            class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm btn-mobile md:w-auto">
+                            <i class="fas fa-trash mr-2"></i>Limpar Histórico
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto table-responsive">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Data</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Produto</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Cliente</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Qtd</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Pagamento</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTable" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-file-pdf text-red-600 mr-2"></i>Relatórios e PDF
+            </h2>
+
+            <div class="bg-gradient-to-r from-red-500 to-orange-600 rounded-xl shadow-lg p-4 md:p-6 mb-6 text-white">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold"><i class="fas fa-calendar-check mr-2"></i>Relatório Automático
+                        </h3>
+                        <p class="text-red-100 text-sm">Gere PDFs das vendas do último sábado de cada mês</p>
+                    </div>
+                    <button onclick="generateLastSaturdayReport()"
+                        class="bg-white text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition font-medium btn-mobile md:w-auto">
+                        <i class="fas fa-download mr-2"></i>Gerar Relatório
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Relatório Mensal
+                    </h3>
+                    <p class="text-gray-600 mb-4">Gere um PDF com todas as vendas do mês selecionado.</p>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
+                            <select id="reportMonth"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="0">Janeiro</option>
+                                <option value="1">Fevereiro</option>
+                                <option value="2">Março</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Maio</option>
+                                <option value="5">Junho</option>
+                                <option value="6">Julho</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Setembro</option>
+                                <option value="9">Outubro</option>
+                                <option value="10">Novembro</option>
+                                <option value="11">Dezembro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+                            <select id="reportYear"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></select>
+                        </div>
+                    </div>
+                    <button onclick="generateMonthlyReport()"
+                        class="w-full bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-medium">
+                        <i class="fas fa-file-pdf mr-2"></i>Gerar Relatório PDF
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-info-circle text-green-600 mr-2"></i>Informações
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mt-1 mr-3"></i>
+                            <p class="text-gray-600">O relatório inclui todas as vendas do período selecionado</p>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mt-1 mr-3"></i>
+                            <p class="text-gray-600">Total de vendas e receita total</p>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mt-1 mr-3"></i>
+                            <p class="text-gray-600">Formas de pagamento (Dinheiro/PIX)</p>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mt-1 mr-3"></i>
+                            <p class="text-gray-600">Produtos mais vendidos</p>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mt-1 mr-3"></i>
+                            <p class="text-gray-600">Detalhamento por cliente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-history text-purple-600 mr-2"></i>Relatórios Gerados
+                </h3>
+                <div class="overflow-x-auto table-responsive">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Data</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Período</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Vendas</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total</th>
+                                <th
+                                    class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTable" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="toastMessage">Operação realizada com sucesso!</span>
+    </div>
+
+    <script>
+        // ============================================
+        // INDEXEDDB - BANCO DE DADOS INTERNO
+        // ============================================
+        const DB_NAME = 'SistemaVendasBiblias';
+        const DB_VERSION = 3;
+        let db = null;
+
+        // Inicializar IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => {
+                    console.error('Erro ao abrir banco de dados:', request.error);
+                    reject(request.error);
+                };
+
+                request.onsuccess = () => {
+                    db = request.result;
+                    console.log('Banco de dados IndexedDB aberto com sucesso!');
+                    updateDBStatus(true);
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+
+                    // Criar store de produtos
+                    if (!database.objectStoreNames.contains('products')) {
+                        const productStore = database.createObjectStore('products', {
+                            keyPath: 'id',
+                            autoIncrement: true
+                        });
+                        productStore.createIndex('type', 'type', { unique: false });
+                        productStore.createIndex('name', 'name', { unique: false });
+                        productStore.createIndex('version', 'version', { unique: false });
+                    }
+
+                    // Criar store de vendas
+                    if (!database.objectStoreNames.contains('sales')) {
+                        const salesStore = database.createObjectStore('sales', {
+                            keyPath: 'id',
+                            autoIncrement: true
+                        });
+                        salesStore.createIndex('date', 'date', { unique: false });
+                        salesStore.createIndex('productId', 'productId', { unique: false });
+                        salesStore.createIndex('customer', 'customer', { unique: false });
+                        salesStore.createIndex('payment', 'payment', { unique: false });
+                    }
+
+                    // Criar store de relatórios
+                    if (!database.objectStoreNames.contains('reports')) {
+                        const reportsStore = database.createObjectStore('reports', {
+                            keyPath: 'id',
+                            autoIncrement: true
+                        });
+                        reportsStore.createIndex('month', 'month', { unique: false });
+                        reportsStore.createIndex('year', 'year', { unique: false });
+                    }
+
+                    console.log('Banco de dados criado/atualizado!');
+                };
+            });
+        }
+
+        // Atualizar status do banco de dados
+        function updateDBStatus(connected) {
+            const statusElement = document.getElementById('dbStatus');
+            const statusMobile = document.getElementById('dbStatusMobile');
+            const html = connected
+                ? '<i class="fas fa-database text-green-400 mr-2"></i><span class="text-green-400 text-xs md:text-sm">Banco Conectado</span>'
+                : '<i class="fas fa-database text-red-400 mr-2"></i><span class="text-red-400 text-xs md:text-sm">Banco Desconectado</span>';
+
+            if (statusElement) statusElement.innerHTML = html;
+            if (statusMobile) statusMobile.innerHTML = html;
+        }
+
+        // Operações CRUD para Produtos
+        const ProductDB = {
+            async getAll() {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['products'], 'readonly');
+                    const store = transaction.objectStore('products');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async add(product) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['products'], 'readwrite');
+                    const store = transaction.objectStore('products');
+                    const request = store.add(product);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async update(product) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['products'], 'readwrite');
+                    const store = transaction.objectStore('products');
+                    const request = store.put(product);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async delete(id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['products'], 'readwrite');
+                    const store = transaction.objectStore('products');
+                    const request = store.delete(Number(id));
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async getById(id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['products'], 'readonly');
+                    const store = transaction.objectStore('products');
+                    const request = store.get(Number(id));
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        };
+
+        // Operações CRUD para Vendas
+        const SalesDB = {
+            async getAll() {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['sales'], 'readonly');
+                    const store = transaction.objectStore('sales');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async add(sale) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['sales'], 'readwrite');
+                    const store = transaction.objectStore('sales');
+                    const request = store.add(sale);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async delete(id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['sales'], 'readwrite');
+                    const store = transaction.objectStore('sales');
+                    const request = store.delete(Number(id));
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async clear() {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['sales'], 'readwrite');
+                    const store = transaction.objectStore('sales');
+                    const request = store.clear();
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        };
+
+        // Operações CRUD para Relatórios
+        const ReportsDB = {
+            async getAll() {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['reports'], 'readonly');
+                    const store = transaction.objectStore('reports');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async add(report) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['reports'], 'readwrite');
+                    const store = transaction.objectStore('reports');
+                    const request = store.add(report);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            async delete(id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['reports'], 'readwrite');
+                    const store = transaction.objectStore('reports');
+                    const request = store.delete(Number(id));
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        };
+
+        // ============================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================
+        let products = [];
+        let sales = [];
+        let reports = [];
+        let autoReportEnabled = false;
+
+        // ============================================
+        // FUNÇÕES UTILITÁRIAS
+        // ============================================
+
+        // Format Currency
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Format Date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR');
+        }
+
+        // Format Date Short
+        function formatDateShort(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Carregar dados do IndexedDB
+        async function loadData() {
+            try {
+                products = await ProductDB.getAll();
+                sales = await SalesDB.getAll();
+                reports = await ReportsDB.getAll();
+
+                console.log('Dados carregados:', {
+                    products: products.length,
+                    sales: sales.length,
+                    reports: reports.length
+                });
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showToast('Erro ao carregar dados do banco', 'error');
+            }
+        }
+
+        // Show Section
+        async function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            // Recarregar dados antes de mostrar
+            await loadData();
+
+            if (sectionId === 'dashboard') updateDashboard();
+            if (sectionId === 'inventory') renderInventory();
+            if (sectionId === 'sales') {
+                renderInventory();
+                updateSalesDropdown();
+                renderSalesHistory();
+            }
+            if (sectionId === 'reports') {
+                initReportForm();
+                renderReportsTable();
+            }
+
+            // Close mobile menu
+            document.getElementById('mobileMenu').classList.add('hidden');
+        }
+
+        // Atualizar opções de versão baseado no tipo
+        function updateVersionOptions() {
+            const type = document.getElementById('productType').value;
+            const versionSelect = document.getElementById('productVersion');
+
+            versionSelect.innerHTML = `
+                <option value="">Selecione...</option>
+                <option value="adulto">Adulto</option>
+                <option value="crianca">Criança</option>
+                <option value="veum">Véu (Mulher)</option>
+            `;
+        }
+
+        // Show Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'
+                } text-white`;
+
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Salvar produto
+        async function saveProductToDB(product) {
+            try {
+                if (product.id) {
+                    await ProductDB.update(product);
+                } else {
+                    await ProductDB.add(product);
+                }
+                await loadData();
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                throw error;
+            }
+        }
+
+        async function deleteProductFromDB(id) {
+            try {
+                await ProductDB.delete(id);
+                await loadData();
+            } catch (error) {
+                console.error('Erro ao excluir produto:', error);
+                throw error;
+            }
+        }
+
+        async function saveSaleToDB(sale) {
+            try {
+                await SalesDB.add(sale);
+                await loadData();
+            } catch (error) {
+                console.error('Erro ao salvar venda:', error);
+                throw error;
+            }
+        }
+
+        async function deleteSaleFromDB(id) {
+            try {
+                await SalesDB.delete(id);
+                await loadData();
+            } catch (error) {
+                console.error('Erro ao excluir venda:', error);
+                throw error;
+            }
+        }
+
+        async function clearSalesFromDB() {
+            try {
+                await SalesDB.clear();
+                await loadData();
+            } catch (error) {
+                console.error('Erro ao limpar vendas:', error);
+                throw error;
+            }
+        }
+
+        async function updateProductInDB(product) {
+            try {
+                await ProductDB.update(product);
+                await loadData();
+            } catch (error) {
+                console.error('Erro ao atualizar produto:', error);
+                throw error;
+            }
+        }
+
+        // Render Inventory Table
+        function renderInventory() {
+            const tbody = document.getElementById('inventoryTable');
+            const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+
+            const filteredProducts = products.filter(p =>
+                p.name.toLowerCase().includes(searchTerm) ||
+                p.type.toLowerCase().includes(searchTerm)
+            );
+
+            tbody.innerHTML = filteredProducts.map(product => {
+                const typeConfig = {
+                    'biblia': { icon: '📖', label: 'Bíblia', color: 'bg-blue-100 text-blue-800' },
+                    'hinario': { icon: '🎵', label: 'Hinário', color: 'bg-purple-100 text-purple-800' },
+                    'livro': { icon: '📚', label: 'Livro', color: 'bg-orange-100 text-orange-800' },
+                    'veum': { icon: '👩', label: 'Véu', color: 'bg-pink-100 text-pink-800' }
+                };
+                const versionConfig = {
+                    'adulto': { icon: '👤', label: 'Adulto', color: 'bg-green-100 text-green-800' },
+                    'crianca': { icon: '👶', label: 'Criança', color: 'bg-yellow-100 text-yellow-800' },
+
+                };
+                const type = typeConfig[product.type] || typeConfig['biblia'];
+                const version = versionConfig[product.version] || versionConfig['adulto'];
+
+                return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium ${type.color}">
+                            ${type.icon} ${type.label}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-800 font-medium">${product.name}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium ${version.color}">
+                            ${version.icon} ${version.label}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-800 font-bold">${formatCurrency(product.price)}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium ${product.quantity < 5
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
+                    }">
+                            ${product.quantity} un
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-800 mr-2 md:mr-3" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-800" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `}).join('');
+
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2"></i>
+                            <p>Nenhum produto encontrado</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Add/Edit Product
+        document.getElementById('productForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('productId').value;
+            const type = document.getElementById('productType').value;
+            const name = document.getElementById('productName').value;
+            const version = document.getElementById('productVersion').value;
+            const quantity = parseInt(document.getElementById('productQuantity').value);
+            const price = parseFloat(document.getElementById('productPrice').value);
+
+            try {
+                if (id) {
+                    const index = products.findIndex(p => p.id == id);
+                    products[index] = { id: parseInt(id), type, name, version, quantity, price };
+                    await updateProductInDB(products[index]);
+                    showToast('Produto atualizado com sucesso!');
+                } else {
+                    const newProduct = {
+                        type,
+                        name,
+                        version,
+                        quantity,
+                        price
+                    };
+                    await saveProductToDB(newProduct);
+                    showToast('Produto cadastrado com sucesso!');
+                }
+
+                this.reset();
+                document.getElementById('productId').value = '';
+                renderInventory();
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                showToast('Erro ao salvar produto. Tente novamente.', 'error');
+            }
+        });
+
+        // Edit Product
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (product) {
+                document.getElementById('productId').value = product.id;
+                document.getElementById('productType').value = product.type;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productVersion').value = product.version;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productQuantity').value = product.quantity;
+                updateVersionOptions();
+
+                // Scroll to form
+                document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+                showToast('Produto carregado para edição');
+            }
+        }
+
+        // Delete Product
+        async function deleteProduct(id) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                try {
+                    await deleteProductFromDB(id);
+                    renderInventory();
+                    showToast('Produto excluído com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao excluir produto:', error);
+                    showToast('Erro ao excluir produto. Tente novamente.', 'error');
+                }
+            }
+        }
+
+        // Search Product
+        document.getElementById('searchProduct').addEventListener('input', renderInventory);
+
+        // Update Sales Dropdown
+        function updateSalesDropdown() {
+            const select = document.getElementById('saleProduct');
+            select.innerHTML = '<option value="">Selecione um produto...</option>' +
+                products.filter(p => p.quantity > 0).map(p => `
+                    <option value="${p.id}" data-price="${p.price}" data-quantity="${p.quantity}">
+                        ${p.name} (${p.version}) - ${formatCurrency(p.price)} - Estoque: ${p.quantity}
+                    </option>
+                `).join('');
+        }
+
+        // Update Sale Total
+        document.getElementById('saleProduct').addEventListener('change', function () {
+            const option = this.options[this.selectedIndex];
+            const price = parseFloat(option.dataset.price) || 0;
+            const quantity = document.getElementById('saleQuantity').value;
+
+            document.getElementById('salePrice').value = formatCurrency(price);
+            updateSaleTotal(price, quantity);
+
+            // Show product info
+            const product = products.find(p => p.id == this.value);
+            const productInfo = document.getElementById('productInfo');
+
+            if (product) {
+                const typeLabels = { 'biblia': 'Bíblia', 'hinario': 'Hinário', 'livro': 'Livro Musical', 'veum': 'Véu (Mulher)' };
+                const versionLabels = { 'adulto': 'Adulto', 'crianca': 'Criança', };
+
+                productInfo.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Tipo:</span>
+                            <span class="font-medium">${typeLabels[product.type] || product.type}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Nome:</span>
+                            <span class="font-medium">${product.name}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Versão:</span>
+                            <span class="font-medium">${versionLabels[product.version] || product.version}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Valor Unitário:</span>
+                            <span class="font-medium text-blue-600">${formatCurrency(product.price)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Estoque Disponível:</span>
+                            <span class="font-medium ${product.quantity < 5 ? 'text-red-600' : 'text-green-600'}">${product.quantity}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                productInfo.innerHTML = '<p class="text-gray-500 text-center py-8">Selecione um produto para ver as informações</p>';
+            }
+        });
+
+        document.getElementById('saleQuantity').addEventListener('input', function () {
+            const option = document.getElementById('saleProduct').options[document.getElementById('saleProduct').selectedIndex];
+            const price = parseFloat(option.dataset.price) || 0;
+            updateSaleTotal(price, this.value);
+        });
+
+        function updateSaleTotal(price, quantity) {
+            const total = price * quantity;
+            document.getElementById('saleTotal').textContent = formatCurrency(total);
+        }
+
+        // Register Sale
+        document.getElementById('salesForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const productId = document.getElementById('saleProduct').value;
+            const quantity = parseInt(document.getElementById('saleQuantity').value);
+            const customer = document.getElementById('saleCustomer').value || 'Cliente não informado';
+            const payment = document.getElementById('salePayment').value;
+
+            const product = products.find(p => p.id == productId);
+
+            if (!product) {
+                showToast('Produto não encontrado', 'error');
+                return;
+            }
+
+            if (product.quantity < quantity) {
+                showToast('Quantidade indisponível em estoque', 'error');
+                return;
+            }
+
+            const total = product.price * quantity;
+
+            const sale = {
+                productId: product.id,
+                productName: product.name,
+                productType: product.type,
+                quantity,
+                unitPrice: product.price,
+                total,
+                customer,
+                payment,
+                date: new Date().toISOString()
+            };
+
+            try {
+                // Atualizar estoque do produto
+                product.quantity -= quantity;
+                await updateProductInDB(product);
+
+                // Salvar venda
+                await saveSaleToDB(sale);
+
+                this.reset();
+                document.getElementById('saleTotal').textContent = 'R$ 0,00';
+                document.getElementById('productInfo').innerHTML = '<p class="text-gray-500 text-center py-8">Selecione um produto para ver as informações</p>';
+
+                updateSalesDropdown();
+                renderSalesHistory();
+                showToast('Venda registrada com sucesso!');
+            } catch (error) {
+                console.error('Erro ao registrar venda:', error);
+                showToast('Erro ao registrar venda. Tente novamente.', 'error');
+            }
+        });
+
+        // Render Sales History
+        function renderSalesHistory() {
+            const tbody = document.getElementById('salesTable');
+
+            tbody.innerHTML = sales.map(sale => {
+                const paymentIcon = sale.payment === 'pix' ? '📱' : '💵';
+                const paymentLabel = sale.payment === 'pix' ? 'PIX' : 'Dinheiro';
+
+                return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-600 text-sm">${formatDateShort(sale.date)}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium ${sale.productType === 'biblia'
+                        ? 'bg-blue-100 text-blue-800'
+                        : sale.productType === 'hinario'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-orange-100 text-orange-800'
+                    }">
+                            ${sale.productName}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-800 text-sm">${sale.customer}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-800">${sale.quantity}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            ${paymentIcon} ${paymentLabel}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-green-600 font-bold">${formatCurrency(sale.total)}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <button onclick="deleteSale(${sale.id})" class="text-red-600 hover:text-red-800" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `}).join('');
+
+            if (sales.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                            <p>Nenhuma venda registrada</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Delete Sale
+        async function deleteSale(id) {
+            if (confirm('Tem certeza que deseja excluir esta venda?')) {
+                try {
+                    const sale = sales.find(s => s.id === id);
+                    if (sale) {
+                        const product = products.find(p => p.id === sale.productId);
+                        if (product) {
+                            product.quantity += sale.quantity;
+                            await updateProductInDB(product);
+                        }
+                        await deleteSaleFromDB(id);
+                        renderSalesHistory();
+                        updateSalesDropdown();
+                        showToast('Venda excluída com sucesso!');
+                    }
+                } catch (error) {
+                    console.error('Erro ao excluir venda:', error);
+                    showToast('Erro ao excluir venda. Tente novamente.', 'error');
+                }
+            }
+        }
+
+        // Clear Sales
+        async function clearSales() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico de vendas?')) {
+                try {
+                    await clearSalesFromDB();
+                    renderSalesHistory();
+                    showToast('Histórico limpo com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao limpar vendas:', error);
+                    showToast('Erro ao limpar histórico. Tente novamente.', 'error');
+                }
+            }
+        }
+
+        // Toggle Mobile Menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Update Dashboard
+        function updateDashboard() {
+            // Total Stock
+            const totalStock = products.reduce((sum, p) => sum + p.quantity, 0);
+            document.getElementById('totalStock').textContent = totalStock;
+
+            // Total Sales
+            document.getElementById('totalSales').textContent = sales.length;
+
+            // Total Revenue
+            const totalRevenue = sales.reduce((sum, s) => sum + s.total, 0);
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+
+            // Total Products
+            document.getElementById('totalProducts').textContent = products.length;
+
+            // Products by Type
+            const bibles = products.filter(p => p.type === 'biblia').length;
+            const hymnals = products.filter(p => p.type === 'hinario').length;
+            const books = products.filter(p => p.type === 'livro').length;
+
+            document.getElementById('productsByType').innerHTML = `
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-book-bible text-blue-600 text-xl mr-3"></i>
+                        <span class="text-gray-700">Bíblias</span>
+                    </div>
+                    <span class="text-2xl font-bold text-blue-600">${bibles}</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-music text-purple-600 text-xl mr-3"></i>
+                        <span class="text-gray-700">Hinários</span>
+                    </div>
+                    <span class="text-2xl font-bold text-purple-600">${hymnals}</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-book text-orange-600 text-xl mr-3"></i>
+                        <span class="text-gray-700">Livros Musicais</span>
+                    </div>
+                    <span class="text-2xl font-bold text-orange-600">${books}</span>
+                </div>
+            `;
+
+            // Recent Sales
+            const recentSales = sales.slice(-5).reverse();
+            document.getElementById('recentSales').innerHTML = recentSales.map(sale => {
+                const paymentIcon = sale.payment === 'pix' ? '📱' : '💵';
+                return `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-medium text-gray-800">${sale.productName}</p>
+                        <p class="text-sm text-gray-500">${sale.customer} • ${paymentIcon} ${sale.payment === 'pix' ? 'PIX' : 'Dinheiro'}</p>
+                    </div>
+                    <span class="text-green-600 font-bold">${formatCurrency(sale.total)}</span>
+                </div>
+            `}).join('') || '<p class="text-gray-500 text-center py-4">Nenhuma venda recente</p>';
+        }
+
+        // ============================================
+        // FUNÇÕES DE RELATÓRIOS E PDF
+        // ============================================
+
+        // Inicializar formulário de relatório
+        function initReportForm() {
+            const now = new Date();
+            const monthSelect = document.getElementById('reportMonth');
+            const yearSelect = document.getElementById('reportYear');
+
+            monthSelect.value = now.getMonth();
+
+            // Preencher anos (últimos 5 anos e próximos 2)
+            yearSelect.innerHTML = '';
+            for (let year = now.getFullYear() - 5; year <= now.getFullYear() + 2; year++) {
+                yearSelect.innerHTML += `<option value="${year}" ${year === now.getFullYear() ? 'selected' : ''}>${year}</option>`;
+            }
+        }
+
+        // Gerar último sábado do mês
+        function getLastSaturdayOfMonth(month, year) {
+            const lastDay = new Date(year, month + 1, 0);
+            let lastSaturday = new Date(lastDay);
+            lastSaturday.setDate(lastDay.getDate() - ((lastDay.getDay() + 1) % 7));
+            return lastSaturday;
+        }
+
+        // Gerar relatório do último sábado
+        async function generateLastSaturdayReport() {
+            const now = new Date();
+            const lastMonth = now.getMonth() - 1;
+            const year = lastMonth < 0 ? now.getFullYear() - 1 : now.getFullYear();
+            const month = lastMonth < 0 ? 11 : lastMonth;
+
+            const lastSaturday = getLastSaturdayOfMonth(month, year);
+            await generateMonthlyReportPDF(month, year, lastSaturday);
+        }
+
+        // Gerar relatório mensal
+        async function generateMonthlyReport() {
+            const month = parseInt(document.getElementById('reportMonth').value);
+            const year = parseInt(document.getElementById('reportYear').value);
+
+            const lastSaturday = getLastSaturdayOfMonth(month, year);
+            await generateMonthlyReportPDF(month, year, lastSaturday);
+        }
+
+        // Gerar PDF do relatório mensal
+        async function generateMonthlyReportPDF(month, year, reportDate) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Filtrar vendas do mês
+            const monthSales = sales.filter(sale => {
+                const saleDate = new Date(sale.date);
+                return saleDate.getMonth() === month && saleDate.getFullYear() === year;
+            });
+
+            const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+            // Cabeçalho
+            doc.setFillColor(59, 130, 246);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.text('Relatório Mensal de Vendas', 105, 20, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text(`${monthNames[month]} ${year}`, 105, 30, { align: 'center' });
+
+            // Informações gerais
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(11);
+            doc.text(`Data do Relatório: ${reportDate.toLocaleDateString('pt-BR')}`, 14, 50);
+            doc.text(`Total de Vendas: ${monthSales.length}`, 14, 58);
+
+            const totalRevenue = monthSales.reduce((sum, sale) => sum + sale.total, 0);
+            doc.text(`Receita Total: ${formatCurrency(totalRevenue)}`, 14, 66);
+
+            // Contar pagamentos
+            const pixCount = monthSales.filter(s => s.payment === 'pix').length;
+            const cashCount = monthSales.filter(s => s.payment === 'dinheiro').length;
+            const pixTotal = monthSales.filter(s => s.payment === 'pix').reduce((sum, s) => sum + s.total, 0);
+            const cashTotal = monthSales.filter(s => s.payment === 'dinheiro').reduce((sum, s) => sum + s.total, 0);
+
+            doc.text(`Pagamentos - Dinheiro: ${cashCount} (${formatCurrency(cashTotal)})`, 14, 74);
+            doc.text(`Pagamentos - PIX: ${pixCount} (${formatCurrency(pixTotal)})`, 14, 82);
+
+            // Tabela de vendas
+            const tableData = monthSales.map(sale => [
+                new Date(sale.date).toLocaleDateString('pt-BR'),
+                sale.productName,
+                sale.customer,
+                sale.quantity.toString(),
+                sale.payment === 'pix' ? 'PIX' : 'Dinheiro',
+                formatCurrency(sale.total)
+            ]);
+
+            doc.autoTable({
+                startY: 92,
+                head: [['Data', 'Produto', 'Cliente', 'Qtd', 'Pagamento', 'Total']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [59, 130, 246] },
+                alternateRowStyles: { fillColor: [245, 247, 250] }
+            });
+
+            // Resumo por produto
+            const productSummary = {};
+            monthSales.forEach(sale => {
+                if (!productSummary[sale.productName]) {
+                    productSummary[sale.productName] = { quantity: 0, total: 0 };
+                }
+                productSummary[sale.productName].quantity += sale.quantity;
+                productSummary[sale.productName].total += sale.total;
+            });
+
+            const summaryData = Object.entries(productSummary).map(([name, data]) => [
+                name,
+                data.quantity.toString(),
+                formatCurrency(data.total)
+            ]);
+
+            doc.text('Resumo por Produto:', 14, doc.lastAutoTable.finalY + 15);
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 20,
+                head: [['Produto', 'Qtd Vendida', 'Total']],
+                body: summaryData,
+                theme: 'striped',
+                headStyles: { fillColor: [34, 197, 94] }
+            });
+
+            // Rodapé
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+                doc.text('Sistema de Vendas - Bíblias, Hinários e Livros', 105, 295, { align: 'center' });
+            }
+
+            // Salvar PDF
+            const fileName = `Relatorio_${monthNames[month]}_${year}.pdf`;
+            doc.save(fileName);
+
+            // Salvar registro do relatório
+            const report = {
+                month,
+                year,
+                monthName: monthNames[month],
+                reportDate: reportDate.toISOString(),
+                generatedAt: new Date().toISOString(),
+                totalSales: monthSales.length,
+                totalRevenue,
+                pixCount,
+                cashCount,
+                fileName
+            };
+
+            await ReportsDB.add(report);
+            await loadData();
+            renderReportsTable();
+
+            showToast('Relatório PDF gerado com sucesso!');
+        }
+
+        // Renderizar tabela de relatórios
+        function renderReportsTable() {
+            const tbody = document.getElementById('reportsTable');
+
+            tbody.innerHTML = reports.map(report => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-600 text-sm">${new Date(report.generatedAt).toLocaleDateString('pt-BR')}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 md:px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            ${report.monthName} ${report.year}
+                        </span>
+                    </td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-gray-800">${report.totalSales}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap text-green-600 font-bold">${formatCurrency(report.totalRevenue)}</td>
+                    <td class="px-4 md:px-6 py-4 whitespace-nowrap">
+                        <button onclick="deleteReport(${report.id})" class="text-red-600 hover:text-red-800" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || `
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                        <i class="fas fa-file-pdf text-4xl mb-2"></i>
+                        <p>Nenhum relatório gerado</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Excluir relatório
+        async function deleteReport(id) {
+            if (confirm('Tem certeza que deseja excluir este relatório?')) {
+                await ReportsDB.delete(id);
+                await loadData();
+                renderReportsTable();
+                showToast('Relatório excluído com sucesso!');
+            }
+        }
+
+        // Exportar PDF mensal direto do header
+        function exportMonthlyPDF() {
+            const now = new Date();
+            document.getElementById('reportMonth').value = now.getMonth();
+            document.getElementById('reportYear').value = now.getFullYear();
+            generateMonthlyReport();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                // Inicializar banco de dados IndexedDB
+                await initDB();
+
+                // Carregar dados
+                await loadData();
+
+                // Mostrar dashboard
+                showSection('dashboard');
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                showToast('Erro ao inicializar sistema. Recarregue a página.', 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>
