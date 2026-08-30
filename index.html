@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema de Controle de Venda - Bíblias e Hinários</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,6 +17,7 @@
 
         * {
             font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -38,7 +39,7 @@
             --toast-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             --scrollbar-thumb: #cbd5e1;
             --scrollbar-track: #f1f5f9;
-            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.85);
             --glass-border: rgba(255, 255, 255, 0.3);
         }
 
@@ -68,7 +69,7 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
         }
 
         .card {
@@ -142,7 +143,6 @@
             background-color: var(--hover-bg) !important;
         }
 
-        /* Header Glassmorphism */
         .header-glass {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -173,7 +173,7 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(12px);
             }
 
             to {
@@ -182,46 +182,8 @@
             }
         }
 
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes pulse-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-            }
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-
-            100% {
-                background-position: 200% 0;
-            }
-        }
-
         .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-
-        .animate-slide-in {
-            animation: slideInRight 0.4s ease-out forwards;
+            animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .stagger-1 {
@@ -245,29 +207,25 @@
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
         }
 
         .btn-primary:hover {
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
             transform: translateY(-1px);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
         }
 
         .btn-success {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
         }
 
         .btn-success:hover {
             background: linear-gradient(135deg, #16a34a, #15803d);
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
             transform: translateY(-1px);
         }
 
@@ -275,16 +233,16 @@
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
         }
 
         .btn-danger:hover {
             background: linear-gradient(135deg, #dc2626, #b91c1c);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
             transform: translateY(-1px);
         }
 
-        /* Nav Button */
+        /* Nav Buttons */
         .nav-btn {
             position: relative;
             overflow: hidden;
@@ -298,7 +256,7 @@
             left: 50%;
             width: 0;
             height: 2px;
-            background: white;
+            background: #3b82f6;
             transition: all 0.3s ease;
             transform: translateX(-50%);
         }
@@ -309,10 +267,11 @@
         }
 
         .nav-btn.active {
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--bg-tertiary);
+            color: #3b82f6;
         }
 
-        /* Stat Card Border Animation */
+        /* Stat Card Border */
         .stat-card {
             position: relative;
             overflow: hidden;
@@ -334,7 +293,7 @@
             transform: scaleX(1);
         }
 
-        /* Theme Toggle */
+        /* Theme Toggle Switch */
         .theme-toggle {
             position: relative;
             width: 52px;
@@ -377,15 +336,17 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--glass-border);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         .bottom-nav-item {
             transition: all 0.2s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .bottom-nav-item.active {
-            color: #3b82f6;
+            color: #3b82f6 !important;
         }
 
         .bottom-nav-item.active::before {
@@ -394,13 +355,13 @@
             top: -1px;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
+            width: 16px;
             height: 3px;
             background: #3b82f6;
             border-radius: 0 0 3px 3px;
         }
 
-        /* Badge */
+        /* Badges */
         .badge {
             font-size: 0.65rem;
             padding: 2px 8px;
@@ -409,24 +370,27 @@
             letter-spacing: 0.3px;
         }
 
-        /* Toast */
-        .toast-container {
-            box-shadow: var(--toast-shadow);
+        /* Progress Bars */
+        .progress-bar {
+            background: var(--bg-tertiary);
+            border-radius: 9999px;
+            overflow: hidden;
         }
 
-        /* Empty State */
-        .empty-state {
-            color: var(--text-muted);
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
         }
 
-        /* Mobile Responsive */
+        /* Mobile Responsive Controls */
         @media (max-width: 768px) {
             .desktop-nav {
                 display: none !important;
             }
 
             main {
-                padding-bottom: 80px;
+                padding-bottom: 90px;
             }
 
             .stat-grid {
@@ -449,29 +413,14 @@
             }
         }
 
-        /* Progress Bar */
-        .progress-bar {
-            background: var(--bg-tertiary);
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 9999px;
-            transition: width 0.5s ease;
-        }
-
-        /* Select styling for dark mode */
         select option {
             background-color: var(--bg-secondary);
             color: var(--text-primary);
         }
 
-        /* Smooth section transitions */
         .section {
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease-out;
         }
 
         .section.visible {
@@ -486,7 +435,7 @@
 
 <body>
     <!-- Header -->
-    <header class="header-glass sticky top-0 z-50">
+    <header class="header-glass sticky top-0 z-40">
         <div class="container mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <!-- Logo -->
@@ -553,28 +502,28 @@
         </div>
     </header>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav bottom-nav fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div class="flex justify-around items-center py-2 px-2">
+    <!-- Mobile Bottom Navigation (Corrigido para evitar overlays no iOS/Android) -->
+    <nav class="mobile-bottom-nav bottom-nav fixed bottom-0 left-0 right-0 z-50 md:hidden shadow-lg">
+        <div class="flex justify-around items-center py-2 px-1">
             <button onclick="showSection('dashboard')" id="bnav-dashboard"
-                class="bottom-nav-item active flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-secondary">
+                class="bottom-nav-item active flex-1 flex flex-col items-center gap-0.5 py-1.5 text-secondary active:scale-95 transition-transform">
                 <i class="fas fa-chart-line text-lg"></i>
-                <span class="text-[10px] font-medium">Dashboard</span>
+                <span class="text-[10px] font-semibold">Dashboard</span>
             </button>
             <button onclick="showSection('inventory')" id="bnav-inventory"
-                class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-secondary">
+                class="bottom-nav-item flex-1 flex flex-col items-center gap-0.5 py-1.5 text-secondary active:scale-95 transition-transform">
                 <i class="fas fa-boxes-stacked text-lg"></i>
-                <span class="text-[10px] font-medium">Estoque</span>
+                <span class="text-[10px] font-semibold">Estoque</span>
             </button>
             <button onclick="showSection('sales')" id="bnav-sales"
-                class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-secondary">
+                class="bottom-nav-item flex-1 flex flex-col items-center gap-0.5 py-1.5 text-secondary active:scale-95 transition-transform">
                 <i class="fas fa-cart-shopping text-lg"></i>
-                <span class="text-[10px] font-medium">Vendas</span>
+                <span class="text-[10px] font-semibold">Vendas</span>
             </button>
             <button onclick="showSection('reports')" id="bnav-reports"
-                class="bottom-nav-item flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-secondary">
+                class="bottom-nav-item flex-1 flex flex-col items-center gap-0.5 py-1.5 text-secondary active:scale-95 transition-transform">
                 <i class="fas fa-chart-bar text-lg"></i>
-                <span class="text-[10px] font-medium">Relatórios</span>
+                <span class="text-[10px] font-semibold">Relatórios</span>
             </button>
         </div>
     </nav>
@@ -1073,9 +1022,9 @@
         </section>
     </main>
 
-    <!-- Toast Notification -->
+    <!-- Toast Notification (Corrigido com pointer-events-none padrão para evitar obstrução de cliques no celular) -->
     <div id="toast"
-        class="toast-container fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 px-5 py-3.5 rounded-2xl transform translate-y-20 opacity-0 transition-all duration-500 z-[60] flex items-center gap-3"
+        class="toast-container fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 px-5 py-3.5 rounded-2xl transform translate-y-20 opacity-0 transition-all duration-500 z-[60] flex items-center gap-3 pointer-events-none"
         style="background: var(--bg-secondary); border: 1px solid var(--border-color)">
         <div id="toastIconWrap" class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
             style="background: rgba(34,197,94,0.1)">
@@ -1114,6 +1063,16 @@
 
     <script>
         // ============================================
+        // MOCK STORAGE FALLBACK (Prevenção para guias anônimas que travam IndexedDB)
+        // ============================================
+        let useFallback = false;
+        let mockStorage = {
+            products: [],
+            sales: [],
+            reports: []
+        };
+
+        // ============================================
         // THEME MANAGEMENT
         // ============================================
         function getPreferredTheme() {
@@ -1131,7 +1090,6 @@
             if (el1) el1.textContent = icon;
             if (el2) el2.textContent = icon;
 
-            // Update meta theme-color
             const meta = document.querySelector('meta[name="theme-color"]');
             if (meta) meta.content = theme === 'dark' ? '#0b1121' : '#ffffff';
         }
@@ -1142,11 +1100,10 @@
             applyTheme(next);
         }
 
-        // Apply theme immediately
         applyTheme(getPreferredTheme());
 
         // ============================================
-        // INDEXEDDB
+        // INDEXEDDB WITH MOCK FALLBACK
         // ============================================
         const DB_NAME = 'SistemaVendasBiblias';
         const DB_VERSION = 3;
@@ -1154,43 +1111,68 @@
 
         function initDB() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    updateDBStatus(true);
-                    resolve(db);
-                };
-                request.onupgradeneeded = (event) => {
-                    const database = event.target.result;
-                    if (!database.objectStoreNames.contains('products')) {
-                        const ps = database.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
-                        ps.createIndex('type', 'type', { unique: false });
-                        ps.createIndex('name', 'name', { unique: false });
-                        ps.createIndex('version', 'version', { unique: false });
-                    }
-                    if (!database.objectStoreNames.contains('sales')) {
-                        const ss = database.createObjectStore('sales', { keyPath: 'id', autoIncrement: true });
-                        ss.createIndex('date', 'date', { unique: false });
-                        ss.createIndex('productId', 'productId', { unique: false });
-                        ss.createIndex('customer', 'customer', { unique: false });
-                        ss.createIndex('payment', 'payment', { unique: false });
-                    }
-                    if (!database.objectStoreNames.contains('reports')) {
-                        const rs = database.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
-                        rs.createIndex('month', 'month', { unique: false });
-                        rs.createIndex('year', 'year', { unique: false });
-                    }
-                };
+                try {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onerror = () => {
+                        console.warn('Falha ao abrir IndexedDB. Ativando modo de segurança local.');
+                        activateLocalFallback();
+                        resolve();
+                    };
+                    request.onsuccess = () => {
+                        db = request.result;
+                        updateDBStatus(true);
+                        resolve(db);
+                    };
+                    request.onupgradeneeded = (event) => {
+                        const database = event.target.result;
+                        if (!database.objectStoreNames.contains('products')) {
+                            const ps = database.createObjectStore('products', { keyPath: 'id', autoIncrement: true });
+                            ps.createIndex('type', 'type', { unique: false });
+                            ps.createIndex('name', 'name', { unique: false });
+                            ps.createIndex('version', 'version', { unique: false });
+                        }
+                        if (!database.objectStoreNames.contains('sales')) {
+                            const ss = database.createObjectStore('sales', { keyPath: 'id', autoIncrement: true });
+                            ss.createIndex('date', 'date', { unique: false });
+                            ss.createIndex('productId', 'productId', { unique: false });
+                            ss.createIndex('customer', 'customer', { unique: false });
+                            ss.createIndex('payment', 'payment', { unique: false });
+                        }
+                        if (!database.objectStoreNames.contains('reports')) {
+                            const rs = database.createObjectStore('reports', { keyPath: 'id', autoIncrement: true });
+                            rs.createIndex('month', 'month', { unique: false });
+                            rs.createIndex('year', 'year', { unique: false });
+                        }
+                    };
+                } catch (e) {
+                    console.warn('IndexedDB bloqueado. Usando Mock de segurança.');
+                    activateLocalFallback();
+                    resolve();
+                }
             });
         }
 
+        function activateLocalFallback() {
+            useFallback = true;
+            // Carregar do localStorage se existir
+            const savedData = localStorage.getItem('backup_sales_data');
+            if (savedData) {
+                try { mockStorage = JSON.parse(savedData); } catch (e) { }
+            }
+            updateDBStatus(true); // Manter conectado para o usuário
+        }
+
+        function saveFallbackData() {
+            localStorage.setItem('backup_sales_data', JSON.stringify(mockStorage));
+        }
+
         function updateDBStatus(connected) {
+            const labelText = useFallback ? 'Nuvem Desativada' : 'Conectado';
             const html = connected
-                ? '<i class="fas fa-circle text-green-500 text-xs mr-1.5" style="font-size:6px"></i><span class="text-xs font-medium text-secondary">Conectado</span>'
+                ? `<i class="fas fa-circle text-green-500 text-xs mr-1.5" style="font-size:6px"></i><span class="text-xs font-medium text-secondary">${labelText}</span>`
                 : '<i class="fas fa-circle text-red-500 text-xs mr-1.5" style="font-size:6px"></i><span class="text-xs font-medium text-secondary">Offline</span>';
             const htmlMobile = connected
-                ? '<i class="fas fa-circle text-green-500" style="font-size:6px"></i>'
+                ? `<i class="fas fa-circle ${useFallback ? 'text-yellow-500' : 'text-green-500'}" style="font-size:6px"></i>`
                 : '<i class="fas fa-circle text-red-500" style="font-size:6px"></i>';
             const el = document.getElementById('dbStatus');
             const elM = document.getElementById('dbStatusMobile');
@@ -1198,26 +1180,106 @@
             if (elM) elM.innerHTML = htmlMobile;
         }
 
-        // DB Operations
+        // DB Operations adaptados para compatibilidade
         const ProductDB = {
-            getAll: () => new Promise((res, rej) => { const t = db.transaction(['products'], 'readonly'); const s = t.objectStore('products'); const r = s.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            add: (p) => new Promise((res, rej) => { const t = db.transaction(['products'], 'readwrite'); const s = t.objectStore('products'); const r = s.add(p); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            update: (p) => new Promise((res, rej) => { const t = db.transaction(['products'], 'readwrite'); const s = t.objectStore('products'); const r = s.put(p); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            delete: (id) => new Promise((res, rej) => { const t = db.transaction(['products'], 'readwrite'); const s = t.objectStore('products'); const r = s.delete(Number(id)); r.onsuccess = () => res(); r.onerror = () => rej(r.error); }),
-            getById: (id) => new Promise((res, rej) => { const t = db.transaction(['products'], 'readonly'); const s = t.objectStore('products'); const r = s.get(Number(id)); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })
+            getAll: () => new Promise((res, rej) => {
+                if (useFallback) return res(mockStorage.products);
+                const t = db.transaction(['products'], 'readonly');
+                const s = t.objectStore('products');
+                const r = s.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            add: (p) => new Promise((res, rej) => {
+                if (useFallback) {
+                    p.id = mockStorage.products.length ? Math.max(...mockStorage.products.map(x => x.id)) + 1 : 1;
+                    mockStorage.products.push(p); saveFallbackData(); return res(p.id);
+                }
+                const t = db.transaction(['products'], 'readwrite');
+                const s = t.objectStore('products');
+                const r = s.add(p); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            update: (p) => new Promise((res, rej) => {
+                if (useFallback) {
+                    const idx = mockStorage.products.findIndex(x => x.id === p.id);
+                    if (idx !== -1) mockStorage.products[idx] = p; saveFallbackData(); return res(p.id);
+                }
+                const t = db.transaction(['products'], 'readwrite');
+                const s = t.objectStore('products');
+                const r = s.put(p); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            delete: (id) => new Promise((res, rej) => {
+                if (useFallback) {
+                    mockStorage.products = mockStorage.products.filter(x => x.id !== Number(id)); saveFallbackData(); return res();
+                }
+                const t = db.transaction(['products'], 'readwrite');
+                const s = t.objectStore('products');
+                const r = s.delete(Number(id)); r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+            }),
+            getById: (id) => new Promise((res, rej) => {
+                if (useFallback) return res(mockStorage.products.find(x => x.id === Number(id)));
+                const t = db.transaction(['products'], 'readonly');
+                const s = t.objectStore('products');
+                const r = s.get(Number(id)); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            })
         };
 
         const SalesDB = {
-            getAll: () => new Promise((res, rej) => { const t = db.transaction(['sales'], 'readonly'); const s = t.objectStore('sales'); const r = s.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            add: (sale) => new Promise((res, rej) => { const t = db.transaction(['sales'], 'readwrite'); const s = t.objectStore('sales'); const r = s.add(sale); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            delete: (id) => new Promise((res, rej) => { const t = db.transaction(['sales'], 'readwrite'); const s = t.objectStore('sales'); const r = s.delete(Number(id)); r.onsuccess = () => res(); r.onerror = () => rej(r.error); }),
-            clear: () => new Promise((res, rej) => { const t = db.transaction(['sales'], 'readwrite'); const s = t.objectStore('sales'); const r = s.clear(); r.onsuccess = () => res(); r.onerror = () => rej(r.error); })
+            getAll: () => new Promise((res, rej) => {
+                if (useFallback) return res(mockStorage.sales);
+                const t = db.transaction(['sales'], 'readonly');
+                const s = t.objectStore('sales');
+                const r = s.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            add: (sale) => new Promise((res, rej) => {
+                if (useFallback) {
+                    sale.id = mockStorage.sales.length ? Math.max(...mockStorage.sales.map(x => x.id)) + 1 : 1;
+                    mockStorage.sales.push(sale); saveFallbackData(); return res(sale.id);
+                }
+                const t = db.transaction(['sales'], 'readwrite');
+                const s = t.objectStore('sales');
+                const r = s.add(sale); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            delete: (id) => new Promise((res, rej) => {
+                if (useFallback) {
+                    mockStorage.sales = mockStorage.sales.filter(x => x.id !== Number(id)); saveFallbackData(); return res();
+                }
+                const t = db.transaction(['sales'], 'readwrite');
+                const s = t.objectStore('sales');
+                const r = s.delete(Number(id)); r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+            }),
+            clear: () => new Promise((res, rej) => {
+                if (useFallback) {
+                    mockStorage.sales = []; saveFallbackData(); return res();
+                }
+                const t = db.transaction(['sales'], 'readwrite');
+                const s = t.objectStore('sales');
+                const r = s.clear(); r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+            })
         };
 
         const ReportsDB = {
-            getAll: () => new Promise((res, rej) => { const t = db.transaction(['reports'], 'readonly'); const s = t.objectStore('reports'); const r = s.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            add: (rpt) => new Promise((res, rej) => { const t = db.transaction(['reports'], 'readwrite'); const s = t.objectStore('reports'); const r = s.add(rpt); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
-            delete: (id) => new Promise((res, rej) => { const t = db.transaction(['reports'], 'readwrite'); const s = t.objectStore('reports'); const r = s.delete(Number(id)); r.onsuccess = () => res(); r.onerror = () => rej(r.error); })
+            getAll: () => new Promise((res, rej) => {
+                if (useFallback) return res(mockStorage.reports);
+                const t = db.transaction(['reports'], 'readonly');
+                const s = t.objectStore('reports');
+                const r = s.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            add: (rpt) => new Promise((res, rej) => {
+                if (useFallback) {
+                    rpt.id = mockStorage.reports.length ? Math.max(...mockStorage.reports.map(x => x.id)) + 1 : 1;
+                    mockStorage.reports.push(rpt); saveFallbackData(); return res(rpt.id);
+                }
+                const t = db.transaction(['reports'], 'readwrite');
+                const s = t.objectStore('reports');
+                const r = s.add(rpt); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+            }),
+            delete: (id) => new Promise((res, rej) => {
+                if (useFallback) {
+                    mockStorage.reports = mockStorage.reports.filter(x => x.id !== Number(id)); saveFallbackData(); return res();
+                }
+                const t = db.transaction(['reports'], 'readwrite');
+                const s = t.objectStore('reports');
+                const r = s.delete(Number(id)); r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+            })
         };
 
         // ============================================
@@ -1245,12 +1307,13 @@
         }
 
         // ============================================
-        // NAVIGATION
+        // NAVIGATION (Ajustado para funcionamento 100% Mobile)
         // ============================================
         async function showSection(sectionId) {
-            // Update nav
+            // Update nav links classes
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+
             const nb = document.getElementById('nav-' + sectionId);
             const bb = document.getElementById('bnav-' + sectionId);
             if (nb) nb.classList.add('active');
@@ -1265,11 +1328,13 @@
             await loadData();
 
             const section = document.getElementById(sectionId);
-            section.classList.remove('hidden');
-            // Trigger reflow then animate
-            requestAnimationFrame(() => {
-                section.classList.add('visible');
-            });
+            if (section) {
+                section.classList.remove('hidden');
+                // Pequeno delay para transição fluida
+                setTimeout(() => {
+                    section.classList.add('visible');
+                }, 10);
+            }
 
             if (sectionId === 'dashboard') updateDashboard();
             if (sectionId === 'inventory') renderInventory();
@@ -1278,7 +1343,7 @@
         }
 
         // ============================================
-        // TOAST
+        // TOAST (Corrigido para evitar bloquear cliques no mobile)
         // ============================================
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -1296,8 +1361,14 @@
                 toastIconWrap.style.background = 'rgba(239,68,68,0.1)';
             }
 
+            // Ativa o container permitindo toque caso queira fechar e inicia animação
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3500);
+            toast.classList.remove('pointer-events-none');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.add('pointer-events-none'); // Volta a ficar transparente aos toques
+            }, 3000);
         }
 
         // ============================================
@@ -1384,7 +1455,6 @@
             }).join('');
         }
 
-        // Product Form
         document.getElementById('productForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const id = document.getElementById('productId').value;
@@ -1475,7 +1545,7 @@
                 const typeLabels = { 'biblia': '📖 Bíblia', 'hinario': '🎵 Hinário', 'livro': '📚 Livro Musical', 'veum': '👩 Véu' };
                 const versionLabels = { 'adulto': '👤 Adulto', 'crianca': '👶 Criança', 'veum': '👩 Véu' };
                 const stockLow = product.quantity < 5;
-                info.innerHTML = `<div class="space-y-3">
+                info.innerHTML = `<div class="space-y-3 animate-fade-in-up">
                     <div class="flex justify-between items-center py-2" style="border-bottom:1px solid var(--border-color)"><span class="text-xs text-secondary">Tipo</span><span class="text-sm font-semibold text-primary">${typeLabels[product.type] || product.type}</span></div>
                     <div class="flex justify-between items-center py-2" style="border-bottom:1px solid var(--border-color)"><span class="text-xs text-secondary">Nome</span><span class="text-sm font-semibold text-primary">${product.name}</span></div>
                     <div class="flex justify-between items-center py-2" style="border-bottom:1px solid var(--border-color)"><span class="text-xs text-secondary">Versão</span><span class="text-sm font-semibold text-primary">${versionLabels[product.version] || product.version}</span></div>
